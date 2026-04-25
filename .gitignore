@@ -43,3 +43,4 @@ dmypy.json
 htmlcov/
 
 
+*.pdf
