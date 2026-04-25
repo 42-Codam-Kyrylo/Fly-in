@@ -1,6 +1,7 @@
 PYTHON ?= python3
 UV ?= uv
 MAIN ?= src/cmd/main.py
+CONFIG ?= maps/easy/01_linear_path.txt
 
 .PHONY: install run debug clean lint lint-strict
 
@@ -8,10 +9,10 @@ install:
 	$(UV) sync
 
 run:
-	$(UV) run $(PYTHON) ${MAIN}
+	PYTHONPATH=src $(UV) run $(PYTHON) ${MAIN} ${CONFIG}
 
 debug:
-	$(UV) run $(PYTHON) -m pdb main.py
+	PYTHONPATH=src $(UV) run $(PYTHON) -m pdb ${MAIN} ${CONFIG}
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
