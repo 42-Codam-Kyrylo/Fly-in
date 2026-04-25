@@ -1,5 +1,6 @@
 PYTHON ?= python3
 UV ?= uv
+MAIN ?= src/cmd/main.py
 
 .PHONY: install run debug clean lint lint-strict
 
@@ -7,7 +8,7 @@ install:
 	$(UV) sync
 
 run:
-	$(UV) run $(PYTHON) main.py
+	$(UV) run $(PYTHON) ${MAIN}
 
 debug:
 	$(UV) run $(PYTHON) -m pdb main.py
