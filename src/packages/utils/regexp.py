@@ -6,6 +6,16 @@ COORD = r"-?\d+"
 METADATA_BLOCK = r"\[(?P<metadata>.*)\]"
 
 # Line patterns
-DRONES_LINE = rf"^nb_drones:\s+(?P<count>\d+)$"
-ZONE_LINE = rf"^(?P<type>start_hub|end_hub|hub):\s+(?P<name>{NAME})\s+(?P<x>{COORD})\s+(?P<y>{COORD})(?:\s+{METADATA_BLOCK})?$"
-CONNECTION_LINE = rf"^connection:\s+(?P<connection>{NAME}-{NAME})(?:\s+{METADATA_BLOCK})?$"
+DRONES_LINE = r"^nb_drones:\s+(?P<count>\d+)$"
+
+ZONE_LINE = (
+    rf"^(?P<type>start_hub|end_hub|hub):\s+"
+    rf"(?P<name>{NAME})\s+"
+    rf"(?P<x>{COORD})\s+"
+    rf"(?P<y>{COORD})"
+    rf"(?:\s+{METADATA_BLOCK})?$"
+)
+
+CONNECTION_LINE = (
+    rf"^connection:\s+(?P<connection>{NAME}-{NAME})(?:\s+{METADATA_BLOCK})?$"
+)
