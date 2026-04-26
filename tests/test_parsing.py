@@ -1,3 +1,6 @@
+# flake8: noqa
+# fmt: off
+
 import pytest
 import textwrap
 import sys
