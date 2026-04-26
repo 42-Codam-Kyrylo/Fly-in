@@ -27,6 +27,18 @@ class Colors(StrEnum):
     YELLOW = auto()
     BLUE = auto()
     GRAY = auto()
+    BLACK = auto()
+    PURPLE = auto()
+    GOLD = auto()
+    MAROON = auto()
+    DARKRED = auto()
+    BROWN = auto()
+    CYAN = auto()
+    CRIMSON = auto()
+    LIME = auto()
+    MAGENTA = auto()
+    RAINBOW = auto()
+    VIOLET = auto()
 
 
 class Metadata(BaseModel):
@@ -37,8 +49,8 @@ class Metadata(BaseModel):
 
 class Zone(BaseModel):
     name: str = Field(pattern=NO_DASH_OR_SPACE_REGEX)
-    x: int = Field(gt=0)
-    y: int = Field(gt=0)
+    x: int
+    y: int
     metadata: Metadata
 
 
