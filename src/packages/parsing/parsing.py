@@ -43,7 +43,8 @@ class ConfigParser:
                         match = re.match(DRONES_LINE, line)
                         if not match:
                             raise ParsingError(
-                                "The first line must define the number of drones using nb_drones: <positive_integer>.",
+                                "The first line must define the number of "
+                                "drones using nb_drones: <positive_integer>.",
                                 line_idx,
                             )
                         nb_drones = int(match.group("count"))
@@ -59,7 +60,6 @@ class ConfigParser:
 
                         meta_data = self._parse_metadata(z_meta_str, line_idx)
                         try:
-                            # Instantiate Metadata first
                             metadata_obj = Metadata(**meta_data)
                             zone_obj = Zone(
                                 name=z_name,
@@ -68,7 +68,6 @@ class ConfigParser:
                                 metadata=metadata_obj,
                             )
                         except ValidationError as e:
-                            # Use first error message
                             msg = e.errors()[0]["msg"]
                             raise ParsingError(msg, line_idx)
 
@@ -93,7 +92,6 @@ class ConfigParser:
                             hubs[z_name] = zone_obj
                         continue
 
-                    # Match connections
                     conn_match = re.match(CONNECTION_LINE, line)
                     if conn_match:
                         c_connection = conn_match.group("connection")
@@ -101,8 +99,6 @@ class ConfigParser:
 
                         meta_data = self._parse_metadata(c_meta_str, line_idx)
                         try:
-                            # Connection model expects connection string and max_link_capacity
-                            # Metadata parsing for connection might have max_link_capacity
                             conn_args = {"connection": c_connection}
                             if "max_link_capacity" in meta_data:
                                 conn_args["max_link_capacity"] = meta_data[
@@ -145,7 +141,6 @@ class ConfigParser:
                 msg = e.errors()[0]["msg"]
             else:
                 msg = str(e)
-            # Global error, line number unknown or last line
             raise ParsingError(msg, line_idx if "line_idx" in locals() else 0)
 
     def _parse_metadata(
@@ -161,7 +156,7 @@ class ConfigParser:
                     f"Invalid metadata format: '{part}'", line_idx
                 )
             key, value = part.split("=", 1)
-            # Map keys to Metadata model fields
+
             if key == "zone":
                 metadata_dict["zone_type"] = value
             elif key == "color":
@@ -183,7 +178,5 @@ class ConfigParser:
                         line_idx,
                     )
             else:
-                # Extra keys might be ignored or raise error.
-                # Let's keep them and let Pydantic handle it (extra="ignore" is default but we don't know Pydantic config)
                 metadata_dict[key] = value
         return metadata_dict
