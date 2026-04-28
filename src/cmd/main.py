@@ -1,5 +1,6 @@
 import sys
 from packages.utils import print_err
+from packages.parsing import ParsingError, ConfigParser
 
 
 def main():
@@ -10,7 +11,15 @@ def main():
         exit(1)
 
     config_path = sys.argv[1]
-    print(f"config path {config_path}")
+    try:
+        parser = ConfigParser(config_path)
+        config = parser.parse()
+        print(config)
+    except ParsingError as e:
+        print(str(e))
+    except Exception as e:
+        print(str(e))
+    # print(f"config path {config_path}")
 
 
 if __name__ == "__main__":
