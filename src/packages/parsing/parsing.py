@@ -27,11 +27,11 @@ class ConfigParser:
         self._reset_state()
 
     def _reset_state(self) -> None:
-        self._nb_drones = None
-        self._start_hub = None
-        self._end_hub = None
-        self._hubs = {}
-        self._connections = []
+        self._nb_drones: int | None = None
+        self._start_hub: Zone | None = None
+        self._end_hub: Zone | None = None
+        self._hubs: dict[str, Zone] = {}
+        self._connections: list[Connection] = []
 
     def parse(self) -> Config:
         self._reset_state()
@@ -81,7 +81,9 @@ class ConfigParser:
         self._register_zone(z_type, zone_obj, line_idx)
         return True
 
-    def _process_zone(self, zone_match: re.Match, line_idx: int) -> tuple[str, Zone]:
+    def _process_zone(
+        self, zone_match: re.Match, line_idx: int
+    ) -> tuple[str, Zone]:
         z_type = zone_match.group("type")
         z_name = zone_match.group("name")
         z_x = int(zone_match.group("x"))
@@ -101,7 +103,9 @@ class ConfigParser:
         except ValidationError as e:
             raise ParsingError(e.errors()[0]["msg"], line_idx)
 
-    def _register_zone(self, z_type: str, zone_obj: Zone, line_idx: int) -> None:
+    def _register_zone(
+        self, z_type: str, zone_obj: Zone, line_idx: int
+    ) -> None:
         if z_type == "start_hub":
             if self._start_hub:
                 raise ParsingError("Multiple start_hub defined", line_idx)
@@ -112,7 +116,9 @@ class ConfigParser:
             self._end_hub = zone_obj
         else:
             if zone_obj.name in self._hubs:
-                raise ParsingError(f"Zone '{zone_obj.name}' already defined", line_idx)
+                raise ParsingError(
+                    f"Zone '{zone_obj.name}' already defined", line_idx
+                )
             self._hubs[zone_obj.name] = zone_obj
 
     def _try_handle_connection(self, line: str, line_idx: int) -> bool:
@@ -124,7 +130,9 @@ class ConfigParser:
         self._connections.append(conn_obj)
         return True
 
-    def _process_connection(self, conn_match: re.Match, line_idx: int) -> Connection:
+    def _process_connection(
+        self, conn_match: re.Match, line_idx: int
+    ) -> Connection:
         c_connection = conn_match.group("connection")
         c_meta_str = conn_match.group("metadata")
 
@@ -138,24 +146,32 @@ class ConfigParser:
         except ValidationError as e:
             raise ParsingError(e.errors()[0]["msg"], line_idx)
 
-    def _parse_metadata(self, metadata_str: str | None, line_idx: int) -> dict[str, Any]:
+    def _parse_metadata(
+        self, metadata_str: str | None, line_idx: int
+    ) -> dict[str, Any]:
         if not metadata_str:
             return {}
 
-        metadata_dict = {}
+        metadata_dict: dict[str, Any] = {}
         for part in metadata_str.split():
             key, value = self._split_metadata_part(part, line_idx)
             self._process_metadata_item(key, value, metadata_dict, line_idx)
         return metadata_dict
 
-    def _split_metadata_part(self, part: str, line_idx: int) -> tuple[str, str]:
+    def _split_metadata_part(
+        self, part: str, line_idx: int
+    ) -> tuple[str, str]:
         if "=" not in part:
             raise ParsingError(f"Invalid metadata format: '{part}'", line_idx)
         parts = part.split("=", 1)
         return parts[0], parts[1]
 
     def _process_metadata_item(
-        self, key: str, value: str, metadata_dict: dict[str, Any], line_idx: int
+        self,
+        key: str,
+        value: str,
+        metadata_dict: dict[str, Any],
+        line_idx: int,
     ) -> None:
         if key == "zone":
             metadata_dict["zone_type"] = value
@@ -170,7 +186,9 @@ class ConfigParser:
         try:
             return int(value)
         except ValueError:
-            raise ParsingError(f"{key} must be an integer, got '{value}'", line_idx)
+            raise ParsingError(
+                f"{key} must be an integer, got '{value}'", line_idx
+            )
 
     def _finalize_config(self, line_idx: int) -> Config:
         if self._nb_drones is None:
@@ -189,5 +207,9 @@ class ConfigParser:
                 connections=self._connections,
             )
         except (ValidationError, ValueError) as e:
-            msg = e.errors()[0]["msg"] if isinstance(e, ValidationError) else str(e)
+            msg = (
+                e.errors()[0]["msg"]
+                if isinstance(e, ValidationError)
+                else str(e)
+            )
             raise ParsingError(msg, line_idx)

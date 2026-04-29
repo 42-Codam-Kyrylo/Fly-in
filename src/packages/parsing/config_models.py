@@ -11,7 +11,7 @@ class ZoneType(StrEnum):
 
     @property
     def cost(self) -> int | float:
-        mapping = {
+        mapping: dict[ZoneType, int | float] = {
             ZoneType.NORMAL: 1,
             ZoneType.RESTRICTED: 2,
             ZoneType.PRIORITY: 1,
@@ -67,7 +67,7 @@ class Config(BaseModel):
     connections: list[Connection]
 
     @model_validator(mode="after")
-    def validate_unique_zone_names(self):
+    def validate_unique_zone_names(self) -> "Config":
         zones = [self.start_hub, self.end_hub, *self.hubs.values()]
         names = [zone.name for zone in zones]
         if len(names) != len(set(names)):
@@ -75,7 +75,7 @@ class Config(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def validate_connection_link(self):
+    def validate_connection_link(self) -> "Config":
         defined_zone_names = {
             self.start_hub.name,
             self.end_hub.name,
@@ -101,7 +101,7 @@ class Config(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def validate_connection_duplicates(self):
+    def validate_connection_duplicates(self) -> "Config":
         normalized_connections: list[tuple[str, str]] = []
         for connection in self.connections:
             endpoints = connection.connection.split("-")
@@ -111,7 +111,9 @@ class Config(BaseModel):
                 )
 
             zone_a, zone_b = endpoints
-            normalized_connections.append(tuple(sorted((zone_a, zone_b))))
+            zone_tuple = tuple(sorted((zone_a, zone_b)))
+            if len(zone_tuple) == 2:
+                normalized_connections.append((zone_tuple[0], zone_tuple[1]))
 
         if len(normalized_connections) != len(set(normalized_connections)):
             raise ValueError(
