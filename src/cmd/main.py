@@ -6,6 +6,7 @@ from packages.parsing import ParsingError, ConfigParser
 from graph.graph import Graph
 from algorithm.simulator import Simulator
 from visualization.html_renderer import HtmlRenderer
+from visualization.terminal_renderer import TerminalRenderer
 
 
 def main() -> None:
@@ -22,6 +23,7 @@ def main() -> None:
         print(result.render())
         print(f"\nTotal turns: {result.total_turns}")
 
+        TerminalRenderer(graph, result).run()
         HtmlRenderer(graph, result).run()
 
     except ParsingError as e:
