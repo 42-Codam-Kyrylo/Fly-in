@@ -1,3 +1,3 @@
-from visualization.renderer import Renderer
+from visualization.html_renderer import HtmlRenderer
 
-__all__ = ["Renderer"]
+__all__ = ["HtmlRenderer"]
