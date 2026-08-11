@@ -1,6 +1,7 @@
 import sys
 from packages.utils import print_err
 from packages.parsing import ParsingError, ConfigParser
+from graph.graph import Graph
 
 
 def main() -> None:
@@ -14,7 +15,6 @@ def main() -> None:
     try:
         parser = ConfigParser(config_path)
         config = parser.parse()
-        from graph.graph import Graph
 
         graph = Graph(config)
         print(f"Successfully initialized graph with {len(graph.nodes)} nodes.")
