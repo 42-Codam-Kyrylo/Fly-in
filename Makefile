@@ -13,6 +13,9 @@ install:
 run:
 	PYTHONPATH=src $(UV) run $(PYTHON) ${MAIN} ${CONFIG}
 
+run-web:
+	PYTHONPATH=src $(UV) run $(PYTHON) ${MAIN} ${CONFIG} -web
+
 debug:
 	PYTHONPATH=src $(UV) run $(PYTHON) -m pdb ${MAIN} ${CONFIG}
 
