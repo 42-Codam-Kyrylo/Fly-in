@@ -2,7 +2,8 @@ PYTHON ?= python3
 UV ?= uv
 MAIN ?= src/cmd/main.py
 # CONFIG ?= maps/custom.txt
-CONFIG ?= maps/intra/medium/02_circular_loop.txt
+# CONFIG ?= maps/intra/medium/02_circular_loop.txt
+CONFIG ?= maps/intra/challenger/01_the_impossible_dream.txt
 
 .PHONY: install run debug clean lint lint-strict
 
