@@ -1,42 +1,30 @@
+"""Entry point: parse config, build graph, run simulation."""
+
 import sys
 from packages.utils import print_err
 from packages.parsing import ParsingError, ConfigParser
 from graph.graph import Graph
+from algorithm.simulator import Simulator
 
 
 def main() -> None:
+    """Parse a map file, route all drones, and print the simulation."""
     if len(sys.argv) < 2:
-        print_err(
-            "Missing config.txt. Pass as python script.py config.txt",
-        )
-        exit(1)
+        print_err("Usage: script.py <config_file>")
+        sys.exit(1)
 
-    config_path = sys.argv[1]
     try:
-        parser = ConfigParser(config_path)
-        config = parser.parse()
-
+        config = ConfigParser(sys.argv[1]).parse()
         graph = Graph(config)
-        print(f"Successfully initialized graph with {len(graph.nodes)} nodes.")
-        for node_name, node in graph.nodes.items():
-            print(
-                (
-                    f"Node {node_name} "
-                    f"(capacity={node.capacity}, cost={node.cost})"
-                )
-            )
-            for edge in node.neighbors:
-                print(
-                    (
-                        f"  -> {edge.to_zone} "
-                        f"(link_capacity={edge.max_link_capacity})"
-                    )
-                )
+        result = Simulator(graph).run()
+        print(result.render())
+        print(f"\nTotal turns: {result.total_turns}")
     except ParsingError as e:
-        print(str(e))
-    except Exception as e:
-        print(str(e))
-    # print(f"config path {config_path}")
+        print_err(str(e))
+        sys.exit(1)
+    except RuntimeError as e:
+        print_err(str(e))
+        sys.exit(1)
 
 
 if __name__ == "__main__":
