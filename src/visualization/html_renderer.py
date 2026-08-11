@@ -60,8 +60,14 @@ class HtmlRenderer:
         }
 
     def _get_html_template(self) -> str:
-        template_path = Path(__file__).parent / "template.html"
-        return template_path.read_text(encoding="utf-8")
+        base_dir = Path(__file__).parent
+        template = (base_dir / "template.html").read_text(encoding="utf-8")
+        style = (base_dir / "style.css").read_text(encoding="utf-8")
+        script = (base_dir / "script.js").read_text(encoding="utf-8")
+
+        template = template.replace("/*STYLE_PLACEHOLDER*/", style)
+        template = template.replace("/*SCRIPT_PLACEHOLDER*/", script)
+        return template
 
     def run(self) -> None:
         """Generate the HTML file and open it."""
