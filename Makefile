@@ -1,8 +1,8 @@
 PYTHON ?= python3
 UV ?= uv
 MAIN ?= src/cmd/main.py
-CONFIG ?= maps/custom.txt
-# CONFIG ?= maps/intra/easy/01_linear_path.txt
+# CONFIG ?= maps/custom.txt
+CONFIG ?= maps/intra/medium/02_circular_loop.txt
 
 .PHONY: install run debug clean lint lint-strict
 
