@@ -26,25 +26,28 @@ def find_path(
     Returns:
         Ordered (time, node) list, or None if unreachable.
     """
-    # heap entry: (time, node)
-    # We use plain Dijkstra — earliest arrival wins.
-    heap: List[Tuple[int, str]] = [(0, start)]
+    # heap entry: (time, penalty, node, previous_state)
+    # Plain Dijkstra: earliest arrival wins
+    heap: List[Tuple[int, int, str, Optional[Tuple[int, str]]]] = [
+        (0, 0, start, None)
+    ]
 
     # best time we've seen to reach each (time, node) state
     visited: Dict[Tuple[int, str], int] = {}
 
     # how we got to each (time, node): stores the previous (time, node)
     came_from: Dict[Tuple[int, str], Optional[Tuple[int, str]]] = {}
-    came_from[(0, start)] = None
 
     while heap:
-        t, node = heapq.heappop(heap)
+        t, penalty, node, prev_state = heapq.heappop(heap)
         state = (t, node)
 
         # Skip if we already processed this state with a better (lower) time
         if state in visited:
             continue
+
         visited[state] = t
+        came_from[state] = prev_state
 
         # Goal reached — rebuild and return path
         if node == goal:
@@ -60,9 +63,7 @@ def find_path(
         if table.node_count(node, t + 1) < node_obj.capacity:
             next_state = (t + 1, node)
             if next_state not in visited:
-                if next_state not in came_from:
-                    came_from[next_state] = state
-                heapq.heappush(heap, (t + 1, node))
+                heapq.heappush(heap, (t + 1, penalty, node, state))
 
         # Option 2: Move to each neighbouring zone
         for edge in graph.get_neighbors(node):
@@ -89,11 +90,11 @@ def find_path(
             if not edge_free:
                 continue
 
+            next_penalty = penalty + (0 if dest_node.is_priority else 1)
+
             next_state = (arrival, dest)
             if next_state not in visited:
-                if next_state not in came_from:
-                    came_from[next_state] = state
-                heapq.heappush(heap, (arrival, dest))
+                heapq.heappush(heap, (arrival, next_penalty, dest, state))
 
     return None  # no path found
 
