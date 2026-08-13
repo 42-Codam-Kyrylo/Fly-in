@@ -4,6 +4,7 @@ from packages.utils import NO_DASH_OR_SPACE_REGEX
 
 
 class ZoneType(StrEnum):
+    """Enumeration of possible zone types."""
     NORMAL = auto()
     BLOCKED = auto()
     RESTRICTED = auto()
@@ -11,6 +12,7 @@ class ZoneType(StrEnum):
 
     @property
     def cost(self) -> int | float:
+        """Get the base cost associated with the zone type."""
         mapping: dict[ZoneType, int | float] = {
             ZoneType.NORMAL: 1,
             ZoneType.RESTRICTED: 2,
@@ -21,6 +23,7 @@ class ZoneType(StrEnum):
 
 
 class Colors(StrEnum):
+    """Enumeration of allowed colors for visualization."""
     RED = auto()
     ORANGE = auto()
     GREEN = auto()
@@ -42,12 +45,14 @@ class Colors(StrEnum):
 
 
 class Metadata(BaseModel):
+    """Metadata attributes for a zone."""
     zone_type: ZoneType = ZoneType.NORMAL
     color: Colors | None = None
     max_drones: int = Field(gt=0, default=1)
 
 
 class Zone(BaseModel):
+    """Represents a location or hub in the drone network."""
     name: str = Field(pattern=NO_DASH_OR_SPACE_REGEX)
     x: int
     y: int
@@ -55,11 +60,13 @@ class Zone(BaseModel):
 
 
 class Connection(BaseModel):
+    """Represents a link between two zones."""
     connection: str
     max_link_capacity: int = Field(gt=0, default=1)
 
 
 class Config(BaseModel):
+    """Complete parsed configuration of the drone network."""
     nb_drones: int = Field(gt=0)
     start_hub: Zone
     end_hub: Zone
@@ -68,6 +75,7 @@ class Config(BaseModel):
 
     @model_validator(mode="after")
     def validate_unique_zone_names(self) -> "Config":
+        """Ensure all zones have distinct names."""
         zones = [self.start_hub, self.end_hub, *self.hubs.values()]
         names = [zone.name for zone in zones]
         if len(names) != len(set(names)):
@@ -76,6 +84,7 @@ class Config(BaseModel):
 
     @model_validator(mode="after")
     def validate_connection_link(self) -> "Config":
+        """Ensure connections only link defined zones."""
         defined_zone_names = {
             self.start_hub.name,
             self.end_hub.name,
@@ -102,6 +111,7 @@ class Config(BaseModel):
 
     @model_validator(mode="after")
     def validate_connection_duplicates(self) -> "Config":
+        """Ensure no duplicate connections exist."""
         normalized_connections: list[tuple[str, str]] = []
         for connection in self.connections:
             endpoints = connection.connection.split("-")

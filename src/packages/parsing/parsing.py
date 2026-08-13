@@ -12,6 +12,7 @@ from packages.utils.regexp import DRONES_LINE, ZONE_LINE, CONNECTION_LINE
 
 
 class ParsingError(Exception):
+    """Exception raised for errors during configuration parsing."""
     def __init__(self, message: str, line: int):
         self.message = message
         self.line = line
@@ -22,7 +23,9 @@ class ParsingError(Exception):
 
 
 class ConfigParser:
+    """Parser for reading and validating network configuration files."""
     def __init__(self, config_path: str) -> None:
+        """Initialize the parser with a file path."""
         self.config_path = config_path
         self._reset_state()
 
@@ -34,6 +37,7 @@ class ConfigParser:
         self._connections: list[Connection] = []
 
     def parse(self) -> Config:
+        """Parse the configuration file and return a Config object."""
         self._reset_state()
         line_idx = 0
         try:

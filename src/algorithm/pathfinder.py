@@ -27,7 +27,6 @@ def find_path(
         Ordered (time, node) list, or None if unreachable.
     """
     # heap entry: (time, penalty, node, previous_state)
-    # Plain Dijkstra: earliest arrival wins
     heap: List[Tuple[int, int, str, Optional[Tuple[int, str]]]] = [
         (0, 0, start, None)
     ]
