@@ -5,7 +5,7 @@ CONFIG ?= maps/custom.txt
 # CONFIG ?= maps/intra/medium/02_circular_loop.txt
 # CONFIG ?= maps/intra/challenger/01_the_impossible_dream.txt
 
-.PHONY: install run debug clean lint lint-strict
+.PHONY: install run run-web debug clean lint lint-strict test
 
 install:
 	$(UV) sync
@@ -34,4 +34,4 @@ lint-strict:
 	$(UV) run mypy . --strict
 
 test:
-	$(UV) run pytest tests/test_parsing.py 
+	PYTHONPATH=src $(UV) run pytest tests/ -v
