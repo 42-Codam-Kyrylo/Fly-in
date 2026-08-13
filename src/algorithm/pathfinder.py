@@ -31,28 +31,22 @@ def find_path(
         (0, 0, start, None)
     ]
 
-    # best time we've seen to reach each (time, node) state
     visited: Dict[Tuple[int, str], int] = {}
-
-    # how we got to each (time, node): stores the previous (time, node)
     came_from: Dict[Tuple[int, str], Optional[Tuple[int, str]]] = {}
 
     while heap:
         t, penalty, node, prev_state = heapq.heappop(heap)
         state = (t, node)
 
-        # Skip if we already processed this state with a better (lower) time
         if state in visited:
             continue
 
         visited[state] = t
         came_from[state] = prev_state
 
-        # Goal reached — rebuild and return path
         if node == goal:
             return _rebuild_path(came_from, state)
 
-        # Hard cutoff to prevent infinite search
         if t >= max_time:
             continue
 
@@ -75,11 +69,9 @@ def find_path(
 
             dest_node = graph.get_node(dest)
 
-            # Check node capacity at arrival
             if table.node_count(dest, arrival) >= dest_node.capacity:
                 continue
 
-            # Check edge capacity for every step of the transit
             edge_free = True
             for dt in range(travel_time):
                 count = table.edge_count(node, dest, t + dt)
@@ -95,7 +87,7 @@ def find_path(
             if next_state not in visited:
                 heapq.heappush(heap, (arrival, next_penalty, dest, state))
 
-    return None  # no path found
+    return None
 
 
 def _rebuild_path(

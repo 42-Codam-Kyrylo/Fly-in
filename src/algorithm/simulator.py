@@ -33,13 +33,11 @@ class SimulationResult:
                 curr_t, curr_node = path[i]
 
                 if prev_node == curr_node:
-                    continue  # drone waited — no output
+                    continue
 
                 if curr_t - prev_t == 1:
-                    # Normal or priority move — one turn
                     events[curr_t].append(f"D{drone_id}-{curr_node}")
                 else:
-                    # Restricted zone: 2-turn transit, show in-between step
                     mid_label = f"{prev_node}-{curr_node}"
                     events[prev_t + 1].append(f"D{drone_id}-{mid_label}")
                     events[curr_t].append(f"D{drone_id}-{curr_node}")
@@ -74,7 +72,6 @@ class Simulator:
         Raises:
             RuntimeError: If any drone has no valid path.
         """
-        # Generous time limit: enough turns to handle waits
         max_time = (len(self.graph.nodes) + self.graph.nb_drones) * 4
         table = ReservationTable()
         paths: Dict[int, List[Tuple[int, str]]] = {}
