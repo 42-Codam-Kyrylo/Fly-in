@@ -39,7 +39,9 @@ class HtmlRenderer:
             if key in seen:
                 continue
             seen.add(key)
-            blocked = not self.graph.is_routable(from_z) or not self.graph.is_routable(  # noqa: E501
+            blocked = not self.graph.is_routable(
+                from_z
+            ) or not self.graph.is_routable(  # noqa: E501
                 to_z
             )
             edges.append(
@@ -83,8 +85,8 @@ class HtmlRenderer:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(html)
 
-        print(f"\\nVisualisation generated at: {path}")
-        print("Opening in default browser...")
+        # print(f"\\nVisualisation generated at: {path}")
+        # print("Opening in default browser...")
 
         # Open in default browser
         webbrowser.open(f"file://{path}")

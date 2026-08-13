@@ -33,7 +33,7 @@ def main() -> None:
         result = Simulator(graph).run()
 
         print(result.render())
-        print(f"\\nTotal turns: {result.total_turns}")
+        print(f"\nTotal turns: {result.total_turns}")
 
         if args.terminal:
             TerminalRenderer(graph, result).run()
