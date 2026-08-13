@@ -1,6 +1,6 @@
 """Graph structures for routing drones between zones."""
 
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Union, cast
 from packages.parsing.config_models import Zone, Config, ZoneType
 
 
@@ -41,34 +41,32 @@ class Node:
         self.zone: Zone = zone
         self.capacity: int = capacity
         self.neighbors: List[Edge] = []
-        self.is_routable: bool = (
-            zone.metadata.zone_type != ZoneType.BLOCKED
-        )
+        self.is_routable: bool = zone.metadata.zone_type != ZoneType.BLOCKED
 
     @property
     def name(self) -> str:
         """Return the zone name."""
-        return self.zone.name
+        return cast(str, self.zone.name)
 
     @property
-    def cost(self) -> int | float:
+    def cost(self) -> Union[int, float]:
         """Return the movement cost for entering this zone."""
-        return self.zone.metadata.zone_type.cost
+        return cast(Union[int, float], self.zone.metadata.zone_type.cost)
 
     @property
     def is_priority(self) -> bool:
         """Return True when zone_type is PRIORITY."""
-        return self.zone.metadata.zone_type == ZoneType.PRIORITY
+        return cast(bool, self.zone.metadata.zone_type == ZoneType.PRIORITY)
 
     @property
     def is_restricted(self) -> bool:
         """Return True when zone_type is RESTRICTED (2-turn)."""
-        return self.zone.metadata.zone_type == ZoneType.RESTRICTED
+        return cast(bool, self.zone.metadata.zone_type == ZoneType.RESTRICTED)
 
     @property
     def is_blocked(self) -> bool:
         """Return True when zone_type is BLOCKED."""
-        return self.zone.metadata.zone_type == ZoneType.BLOCKED
+        return cast(bool, self.zone.metadata.zone_type == ZoneType.BLOCKED)
 
 
 class Graph:

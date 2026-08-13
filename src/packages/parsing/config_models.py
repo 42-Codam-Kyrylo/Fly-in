@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field, model_validator
+from typing import Union
 from enum import StrEnum, auto
 from packages.utils import NO_DASH_OR_SPACE_REGEX
 
@@ -11,15 +12,16 @@ class ZoneType(StrEnum):
     PRIORITY = auto()
 
     @property
-    def cost(self) -> int | float:
+    def cost(self) -> Union[int, float]:
         """Get the base cost associated with the zone type."""
-        mapping: dict[ZoneType, int | float] = {
+        mapping: dict["ZoneType", Union[int, float]] = {
             ZoneType.NORMAL: 1,
             ZoneType.RESTRICTED: 2,
             ZoneType.PRIORITY: 1,
             ZoneType.BLOCKED: float("inf"),
         }
-        return mapping.get(self, 1)
+        result: Union[int, float] = mapping.get(self, 1)
+        return result
 
 
 class Colors(StrEnum):
