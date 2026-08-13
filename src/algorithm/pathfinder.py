@@ -1,4 +1,4 @@
-"""Space-Time Dijkstra for single-drone pathfinding."""
+"""Space-Time Dijkstra: finds shortest path for one drone."""
 
 import heapq
 from typing import Dict, List, Optional, Tuple
@@ -6,124 +6,107 @@ from typing import Dict, List, Optional, Tuple
 from graph.graph import Graph
 from algorithm.reservation import ReservationTable
 
-# (time, node_name)
-type _Key = Tuple[int, str]
-# heap entry: (time, priority_penalty, node_name)
-type _State = Tuple[int, int, str]
-
 
 def find_path(
     graph: Graph,
     start: str,
     goal: str,
-    start_time: int,
     table: ReservationTable,
     max_time: int,
 ) -> Optional[List[Tuple[int, str]]]:
-    """Find the lowest-time path for one drone, respecting reservations.
-
-    Priority zones break ties when arrival times are equal.
+    """Find the fastest path from *start* to *goal* for one drone.
 
     Args:
         graph: Routing graph.
         start: Start zone name.
         goal: Goal zone name.
-        start_time: Departure time step.
-        table: Read-only reservations from higher-priority drones.
+        table: Occupancy reserved by higher-priority drones.
         max_time: Hard time-step cap.
 
     Returns:
-        Ordered (time, node_name) list, or None if goal is unreachable.
+        Ordered (time, node) list, or None if unreachable.
     """
-    heap: List[_State] = [(start_time, 0, start)]
-    # best priority-penalty seen for each (time, node) state
-    best_pp: Dict[_Key, int] = {(start_time, start): 0}
-    came_from: Dict[_Key, Optional[_Key]] = {(start_time, start): None}
+    # heap entry: (time, node)
+    # We use plain Dijkstra — earliest arrival wins.
+    heap: List[Tuple[int, str]] = [(0, start)]
+
+    # best time we've seen to reach each (time, node) state
+    visited: Dict[Tuple[int, str], int] = {}
+
+    # how we got to each (time, node): stores the previous (time, node)
+    came_from: Dict[Tuple[int, str], Optional[Tuple[int, str]]] = {}
+    came_from[(0, start)] = None
 
     while heap:
-        t, pp, node = heapq.heappop(heap)
-        key: _Key = (t, node)
+        t, node = heapq.heappop(heap)
+        state = (t, node)
 
-        if best_pp.get(key, pp + 1) < pp:
-            continue  # stale heap entry
+        # Skip if we already processed this state with a better (lower) time
+        if state in visited:
+            continue
+        visited[state] = t
 
+        # Goal reached — rebuild and return path
         if node == goal:
-            return _reconstruct(came_from, key)
+            return _rebuild_path(came_from, state)
 
+        # Hard cutoff to prevent infinite search
         if t >= max_time:
             continue
 
         node_obj = graph.get_node(node)
 
-        # --- Wait at current node ---
+        # Option 1: Wait at the current node for one turn
         if table.node_count(node, t + 1) < node_obj.capacity:
-            wait_pp = pp + (0 if node_obj.is_priority else 1)
-            _relax(
-                heap, best_pp, came_from,
-                prev=key, nxt=(t + 1, node), pp=wait_pp,
-            )
+            next_state = (t + 1, node)
+            if next_state not in visited:
+                if next_state not in came_from:
+                    came_from[next_state] = state
+                heapq.heappush(heap, (t + 1, node))
 
-        # --- Move to each routable neighbour ---
+        # Option 2: Move to each neighbouring zone
         for edge in graph.get_neighbors(node):
             dest = edge.to_zone
-            arr_t = t + int(edge.cost)
-            if arr_t > max_time:
+            travel_time = int(edge.cost)
+            arrival = t + travel_time
+
+            if arrival > max_time:
                 continue
+
             dest_node = graph.get_node(dest)
-            if table.node_count(dest, arr_t) >= dest_node.capacity:
+
+            # Check node capacity at arrival
+            if table.node_count(dest, arrival) >= dest_node.capacity:
                 continue
-            if not _edge_clear(
-                table, node, dest, t, int(edge.cost), edge.max_link_capacity
-            ):
+
+            # Check edge capacity for every step of the transit
+            edge_free = True
+            for dt in range(travel_time):
+                count = table.edge_count(node, dest, t + dt)
+                if count >= edge.max_link_capacity:
+                    edge_free = False
+                    break
+            if not edge_free:
                 continue
-            move_pp = pp + (0 if dest_node.is_priority else 1)
-            _relax(
-                heap, best_pp, came_from,
-                prev=key, nxt=(arr_t, dest), pp=move_pp,
-            )
 
-    return None
+            next_state = (arrival, dest)
+            if next_state not in visited:
+                if next_state not in came_from:
+                    came_from[next_state] = state
+                heapq.heappush(heap, (arrival, dest))
 
-
-def _edge_clear(
-    table: ReservationTable,
-    src: str,
-    dst: str,
-    t: int,
-    cost: int,
-    cap: int,
-) -> bool:
-    """Return True when edge (src→dst) has free capacity for all transit."""
-    for dt in range(cost):
-        if table.edge_count(src, dst, t + dt) >= cap:
-            return False
-    return True
+    return None  # no path found
 
 
-def _relax(
-    heap: List[_State],
-    best_pp: Dict[_Key, int],
-    came_from: Dict[_Key, Optional[_Key]],
-    prev: _Key,
-    nxt: _Key,
-    pp: int,
-) -> None:
-    """Update best path to *nxt* if *pp* improves the known best."""
-    if best_pp.get(nxt, pp + 1) > pp:
-        best_pp[nxt] = pp
-        came_from[nxt] = prev
-        t, node = nxt
-        heapq.heappush(heap, (t, pp, node))
-
-
-def _reconstruct(
-    came_from: Dict[_Key, Optional[_Key]],
-    end: _Key,
+def _rebuild_path(
+    came_from: Dict[Tuple[int, str], Optional[Tuple[int, str]]],
+    end: Tuple[int, str],
 ) -> List[Tuple[int, str]]:
+    """Walk back through came_from to reconstruct the path."""
     path: List[Tuple[int, str]] = []
-    cur: Optional[_Key] = end
-    while cur is not None:
-        path.append(cur)
-        cur = came_from[cur]
+    current: Optional[Tuple[int, str]] = end
+    while current is not None:
+        path.append(current)
+        current = came_from[current]
     path.reverse()
     return path
