@@ -1,0 +1,20 @@
+# Priority Map 5: Tiebreaker — two equal-cost paths (both 2 turns).
+# One path goes through a PRIORITY zone, the other through a NORMAL zone.
+# The algorithm MUST prefer the priority path as a tiebreaker.
+#
+#   start ---> priority_zone ---> goal   (2 turns, penalty=0)
+#   start ---> normal_zone   ---> goal   (2 turns, penalty=1)
+#
+# Expected: drone visits priority_zone, NOT normal_zone.
+
+nb_drones: 1
+
+start_hub: start 0 0 [color=green]
+hub: priority_zone 1 1 [zone=priority color=blue]
+hub: normal_zone 1 -1 [color=gray]
+end_hub: goal 2 0 [color=red]
+
+connection: start-priority_zone
+connection: priority_zone-goal
+connection: start-normal_zone
+connection: normal_zone-goal

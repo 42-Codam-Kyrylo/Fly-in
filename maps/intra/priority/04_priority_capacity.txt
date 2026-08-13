@@ -1,0 +1,24 @@
+# Priority Map 4: Priority zone has capacity 1. Two drones start together.
+# D1 grabs the priority zone at t=1. D2 is blocked from it at t=1,
+# so it must wait or take the normal alternative path.
+# Test:
+#   - D1 visits the priority zone
+#   - D2 does NOT visit the priority zone at the same time as D1
+#   - Both eventually reach goal
+#   - Node capacity is never exceeded
+#
+#   start ---> priority (cap=1) ---> goal
+#     \                               ^
+#      \--------> normal ----------->
+
+nb_drones: 2
+
+start_hub: start 0 0 [color=green max_drones=2]
+hub: priority 1 0 [zone=priority color=blue max_drones=1]
+hub: normal 1 -1 [color=gray]
+end_hub: goal 2 0 [color=red max_drones=2]
+
+connection: start-priority
+connection: priority-goal
+connection: start-normal
+connection: normal-goal

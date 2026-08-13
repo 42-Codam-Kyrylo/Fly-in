@@ -1,0 +1,17 @@
+# Priority Map 1: Only route goes through priority zones.
+# There is no alternative path — drone is forced to use priority zones.
+# Test: verify drone visits both priority nodes and arrives in 3 turns.
+#
+#   start ---> prio1 ---> prio2 ---> goal
+#   t=0         t=1        t=2        t=3
+
+nb_drones: 1
+
+start_hub: start 0 0 [color=green]
+hub: prio1 1 0 [zone=priority color=blue]
+hub: prio2 2 0 [zone=priority color=blue]
+end_hub: goal 3 0 [color=red]
+
+connection: start-prio1
+connection: prio1-prio2
+connection: prio2-goal

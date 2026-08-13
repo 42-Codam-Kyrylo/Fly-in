@@ -1,0 +1,19 @@
+# Priority Map 2: Two paths — one through priority (2 turns), one through
+# restricted zones (3 turns). Dijkstra always picks the fastest route.
+# Test: drone must arrive in 2 turns via priority, NOT 3 turns via restricted.
+#
+#   start ---> via_priority ---> goal    (2 turns)
+#     \                                  
+#      \--> via_restricted ---> goal     (3 turns: restricted costs 2)
+
+nb_drones: 1
+
+start_hub: start 0 0 [color=green]
+hub: via_priority 1 1 [zone=priority color=blue]
+hub: via_restricted 1 -1 [zone=restricted color=orange]
+end_hub: goal 2 0 [color=red]
+
+connection: start-via_priority
+connection: via_priority-goal
+connection: start-via_restricted
+connection: via_restricted-goal

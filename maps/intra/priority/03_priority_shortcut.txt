@@ -1,0 +1,21 @@
+# Priority Map 3: Two paths — priority shortcut (2 turns) vs normal detour
+# (3 turns). Dijkstra picks fewer hops = priority wins.
+# Test: drone arrives in exactly 2 turns, having taken the shortcut.
+#
+#   start ---> shortcut (priority) ---> goal    (2 turns)
+#     \                                          
+#      \--> normal1 ---> normal2 ---> goal       (3 turns)
+
+nb_drones: 1
+
+start_hub: start 0 0 [color=green]
+hub: shortcut 1 0 [zone=priority color=blue]
+hub: normal1 1 2 [color=gray]
+hub: normal2 2 2 [color=gray]
+end_hub: goal 2 0 [color=red]
+
+connection: start-shortcut
+connection: shortcut-goal
+connection: start-normal1
+connection: normal1-normal2
+connection: normal2-goal
